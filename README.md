@@ -52,19 +52,19 @@ Para que o código funcione corretamente, certifique-se de que a estrutura de pa
 
 ---
 
-##🕹️ Controles
-Setas / WASD: Movimentam a nave.
-SHIFT (Esquerdo/Direito): Modo Foco (reduz a velocidade da nave para desvios precisos).
-BARRA DE ESPAÇO: Atirar.
-X: Soltar Bomba (Limpa a tela e causa dano ao Boss).
+## 🕹️ Controles
+* Setas / WASD: Movimentam a nave.
+* SHIFT (Esquerdo/Direito): Modo Foco (reduz a velocidade da nave para desvios precisos).
+* BARRA DE ESPAÇO: Atirar.
+* X: Soltar Bomba (Limpa a tela e causa dano ao Boss).
 
 ---
 
-##🧠 Aprendizado Acadêmico
+## 🧠 Aprendizado Acadêmico
 Este projeto foi fundamental para consolidar conceitos de:
-Programação Orientada a Objetos (POO): Utilização de classes e herança através do pygame.sprite.Sprite.
-Gerenciamento de Recursos: Carregamento de texturas e buffers de áudio.
-Game Loop e FPS: Controle do tempo e atualização de física na tela de forma assíncrona.
+* Programação Orientada a Objetos (POO): Utilização de classes e herança através do pygame.sprite.Sprite.
+* Gerenciamento de Recursos: Carregamento de texturas e buffers de áudio.
+* Game Loop e FPS: Controle do tempo e atualização de física na tela de forma assíncrona.
 
 ---
 
