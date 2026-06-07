@@ -3,7 +3,6 @@ import sys
 import random
 import math
 
-# 1. Inicialização do Pygame
 pygame.init()
 pygame.mixer.init()
 
@@ -24,21 +23,17 @@ pygame.display.set_caption("Danmaku universe")
 relogio = pygame.time.Clock()
 FPS = 60
 
-# --- CARREGAMENTO DE TEXTURAS (IMAGENS) ---
+# Load imagens
 
-# Se você tiver imagens separadas na pasta:
 IMG_JOGADOR = pygame.image.load('imagens/nave.png').convert_alpha()
 IMG_TIRO_JOGADOR = pygame.image.load('imagens/laser_player.png').convert_alpha()
 IMG_TIRO_INIMIGO = pygame.image.load('imagens/laser_enemy.png').convert_alpha()
-    
-# Imagens diferentes para cada tipo de inimigo
 IMG_INIMIGO_PADRAO1 = pygame.image.load('imagens/inimigo.png').convert_alpha()
 IMG_INIMIGO_PADRAO2 = pygame.image.load('imagens/inimigo_2.png').convert_alpha()
 IMG_INIMIGO_PADRAO3 = pygame.image.load('imagens/inimigo_3.png').convert_alpha()
-
 IMG_BOSS = pygame.image.load('imagens/boss.png').convert_alpha()
 
-# --- DICIONÁRIO DE CONFIGURAÇÃO DAS DIFICULDADES ---
+# Dicionário de dificuldades
 CONFIG_DIFICULDADE = {
     "FÁCIL": {
         "tempo_spawn": 1500, "cooldown_tiro": 2000, "quantidade_balas": 4, "padroes_disponiveis": [1],
@@ -58,7 +53,7 @@ CONFIG_DIFICULDADE = {
     }
 }
 
-# --- VARIÁVEIS GLOBAIS DO JOGO ---
+# Variaveis globais
 PONTUACAO = 0
 PROXIMO_BOSS = 5000 
 PROXIMA_BOMBA = 5000  
@@ -77,7 +72,7 @@ fonte_spellcard = pygame.font.SysFont('comicsansms', 22, italic=True, bold=True)
 EVENTO_CRIAR_INIMIGO = pygame.USEREVENT + 1
 
 
-# --- CLASSE DO TIRO DO INIMIGO ---
+# Classe de tiro inimigo
 class TiroInimigo(pygame.sprite.Sprite):
     def __init__(self, x, y, angulo, velocidade_bala):
         super().__init__()
@@ -95,11 +90,10 @@ class TiroInimigo(pygame.sprite.Sprite):
             self.kill()
 
 
-# --- CLASSE DO INIMIGO COMUM ---
+# Classe inimigo
 class Inimigo(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        # Removemos a linha antiga da imagem daqui de cima...
         
         self.rect = pygame.Rect(0, 0, 40, 40) # Cria um retângulo base para o posicionamento
         self.rect.x = random.randint(50, LARGURA - 50)
@@ -111,7 +105,7 @@ class Inimigo(pygame.sprite.Sprite):
         self.tipo_padrao = random.choice(config["padroes_disponiveis"])
         self.qtd_balas = config["quantidade_balas"]
         
-        # --- NOVO: Define o sprite/imagem de acordo com o padrão sorteado ---
+        # Define o sprite/imagem de acordo com o padrão sorteado
         if self.tipo_padrao == 1:
             self.image = pygame.transform.scale(IMG_INIMIGO_PADRAO1, (40, 40))
         elif self.tipo_padrao == 2:
@@ -122,7 +116,7 @@ class Inimigo(pygame.sprite.Sprite):
         # Ajusta o rect definitivo para o tamanho da imagem escolhida
         self.rect = self.image.get_rect(center=(self.rect.x, self.rect.y))
         
-        # Mantém a sua lógica do cooldown alterado para o padrão 2
+        # Mantém a logica alterada para o tipo 2
         if self.tipo_padrao == 2:
             self.cooldown_tiro = config["cooldown_tiro"] * 2.5
         else:
@@ -165,7 +159,7 @@ class Inimigo(pygame.sprite.Sprite):
                 grupo_tiros_inimigos.add(bala)
 
 
-# --- CLASSE DO CHEFE (BOSS) ---
+# Classe boss
 class Boss(pygame.sprite.Sprite):
     def __init__(self, numero_aparicoes):
         super().__init__()
@@ -219,7 +213,7 @@ class Boss(pygame.sprite.Sprite):
                 grupo_tiros_inimigos.add(bala)
 
 
-# --- CLASSE DO TIRO DO JOGADOR ---
+# Classe tiro jogador
 class Tiro(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
@@ -235,7 +229,7 @@ class Tiro(pygame.sprite.Sprite):
             self.kill()
 
 
-# --- CLASSE DO JOGADOR ---
+# Classe jogador
 class Jogador(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -253,24 +247,24 @@ class Jogador(pygame.sprite.Sprite):
         self.vidas = 3
         self.bombas = 2  
 
-        # --- NOVAS VARIÁVEIS PARA OS IFRAMES ---
+        # Iframes
         self.invulneravel = False
         self.tempo_dano = 0
-        self.duracao_iframe = 500  # Tempo em milissegundos (0.5 segundo)
+        self.duracao_iframe = 500
 
     def update(self):
         teclas = pygame.key.get_pressed()
         agora = pygame.time.get_ticks()
 
-        # --- ATUALIZAÇÃO DO STATUS DE INVULNERABILIDADE ---
+        # Gerenciamento de Iframes e efeito de piscar
         if self.invulneravel:
             if agora - self.tempo_dano > self.duracao_iframe:
                 self.invulneravel = False
-                self.image = self.imagem_original # Garante que a imagem volte ao normal
+                self.image = self.imagem_original
             else:
-                # Efeito visual de piscar (Usa o tempo para alternar a opacidade/render)
+                # Efeito visual de piscar
                 if (agora // 50) % 2 == 0:
-                    self.image = pygame.Surface((0, 0)) # Fica "invisível" temporariamente
+                    self.image = pygame.Surface((0, 0))
                 else:
                     self.image = self.imagem_original
 
@@ -323,7 +317,6 @@ class Jogador(pygame.sprite.Sprite):
             if boss_atual:
                 boss_atual.vida -= 300
 
-    # --- NOVO MÉTODO: APLICAÇÃO DO DANO SEGURO ---
     def receber_dano(self):
         if not self.invulneravel:
             self.vidas -= 1
@@ -331,7 +324,7 @@ class Jogador(pygame.sprite.Sprite):
             self.tempo_dano = pygame.time.get_ticks()
 
 
-# --- FUNÇÕES INTERFACES E RENDERIZAÇÃO ---
+# Renderização de HUD e telas
 def desenhar_hud():
     txt_p = fonte_hud.render(f"SCORE: {PONTUACAO}", True, (255, 255, 255))
     tela.blit(txt_p, (10, 10))
@@ -405,7 +398,7 @@ def iniciar_gameplay():
     pygame.time.set_timer(EVENTO_CRIAR_INIMIGO, tempo_spawn)
 
 
-# --- CONFIGURAÇÃO DOS GRUPOS ---
+# Configuações iniciais dos grupos de sprites e do jogador
 todos_os_sprites = pygame.sprite.Group()
 grupo_tiros = pygame.sprite.Group()
 grupo_inimigos = pygame.sprite.Group()
@@ -415,7 +408,7 @@ jogador = Jogador()
 todos_os_sprites.add(jogador)
 boss = None 
 
-# --- LOOP PRINCIPAL DO JOGO ---
+# Loop principal
 duracao_flash_bomba = 0
 
 rodando = True
@@ -461,7 +454,7 @@ while rodando:
                 if evento.key == pygame.K_RETURN:
                     ESTADO = "MENU"
 
-    # ================= MÁQUINA DE ESTADOS =================
+    # Maquina de estados
     if ESTADO == "MENU":
         mostrar_tela_menu()
 
@@ -485,7 +478,7 @@ while rodando:
             boss = Boss(APARICOES_BOSS)
             todos_os_sprites.add(boss)
 
-        # COLISÕES TIRO DO JOGADOR
+        # Colisões dos tiros do jogador com inimigos e boss
         for tiro in grupo_tiros:
             inimigos_atingidos = pygame.sprite.spritecollide(tiro, grupo_inimigos, True)
             if inimigos_atingidos:
@@ -507,7 +500,6 @@ while rodando:
             pygame.mixer.music.load('musica/Stage.mp3')
             pygame.mixer.music.play(-1)
         
-        # --- MODIFICAÇÃO NAS COLISÕES DO JOGADOR (MUDADO DE JOGADOR.VIDAS -= 1 PARA RECEBER_DANO) ---
         for inimigo in grupo_inimigos:
             if jogador.hitbox.colliderect(inimigo.rect):
                 inimigo.kill()
@@ -525,7 +517,7 @@ while rodando:
             ESTADO = "GAMEOVER"
             pygame.mixer.music.stop()
 
-        # RENDERIZAÇÃO
+        # Renderização
         tela.fill((20, 20, 30)) 
         todos_os_sprites.draw(tela)
 
@@ -536,7 +528,7 @@ while rodando:
             tela.blit(flash,(0,0))
             duracao_flash_bomba -=1
 
-        # Só renderiza a caixinha verde da Hitbox se o jogador NÃO estiver piscando/invisível
+        # Só renderiza a Hitbox se o jogador NÃO estiver piscando/invisível
         if jogador.image.get_width() > 0:
             pygame.draw.rect(tela, (0, 255, 0), jogador.hitbox) 
             
