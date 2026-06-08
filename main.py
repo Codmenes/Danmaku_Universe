@@ -32,6 +32,7 @@ IMG_INIMIGO_PADRAO1 = pygame.image.load('imagens/inimigo.png').convert_alpha()
 IMG_INIMIGO_PADRAO2 = pygame.image.load('imagens/inimigo_2.png').convert_alpha()
 IMG_INIMIGO_PADRAO3 = pygame.image.load('imagens/inimigo_3.png').convert_alpha()
 IMG_BOSS = pygame.image.load('imagens/boss.png').convert_alpha()
+IMG_BACKGROUND = pygame.image.load('imagens/fundo.png').convert()
 
 # Dicionário de dificuldades
 CONFIG_DIFICULDADE = {
@@ -61,7 +62,14 @@ APARICOES_BOSS = 0
 ESTADO = "MENU" 
 DIFICULDADE_ATUAL = "MÉDIO" 
 DIFICULDADES_LISTA = ["FÁCIL", "MÉDIO", "DIFÍCIL", "INSANO"]
-INDICE_SELECIONADO = 1 
+INDICE_SELECIONADO = 1
+MODO_DE_JOGO = "ENDLESS"
+PONTUACAO_VITORIA = 8000
+VENCEU = False
+LARGURA_BG, ALTURA_BG = IMG_BACKGROUND.get_size()
+fundo_y1 = 0
+fundo_y2 = -ALTURA_BG
+velocidade_fundo = 2
 
 fonte_hud = pygame.font.SysFont('arial', 32, bold=True)
 fonte_bombas = pygame.font.SysFont('arial', 26, bold=True)
@@ -328,7 +336,7 @@ class Jogador(pygame.sprite.Sprite):
 def desenhar_hud():
     txt_p = fonte_hud.render(f"SCORE: {PONTUACAO}", True, (255, 255, 255))
     tela.blit(txt_p, (10, 10))
-    txt_d = fonte_subtitulo.render(f"MODE: {DIFICULDADE_ATUAL}", True, (180, 180, 180))
+    txt_d = fonte_subtitulo.render(f"{MODO_DE_JOGO} - {DIFICULDADE_ATUAL}", True, (180, 180, 180))
     tela.blit(txt_d, (10, 45))
     
     txt_v = fonte_hud.render(f"LIVES: {jogador.vidas}", True, (0, 255, 100))
@@ -336,6 +344,21 @@ def desenhar_hud():
     
     txt_b = fonte_bombas.render(f"BOMBS: {jogador.bombas}", True, (255, 150, 0))
     tela.blit(txt_b, (LARGURA - 150, 45))
+
+def atualizar_e_desenhar_fundo():
+    global fundo_y1, fundo_y2
+    
+    fundo_y1 += velocidade_fundo
+    fundo_y2 += velocidade_fundo
+    
+    if fundo_y1 >= ALTURA:
+        fundo_y1 = -ALTURA_BG + (fundo_y1 - ALTURA)
+        
+    if fundo_y2 >= ALTURA:
+        fundo_y2 = -ALTURA_BG + (fundo_y2 - ALTURA)
+        
+    tela.blit(IMG_BACKGROUND, (0, fundo_y1))
+    tela.blit(IMG_BACKGROUND, (0, fundo_y2))
 
 def desenhar_barra_boss():
     if boss and ESTADO == "BOSS":
@@ -352,9 +375,11 @@ def desenhar_barra_boss():
 def mostrar_tela_menu():
     tela.fill((10, 10, 20))
     txt_titulo = fonte_titulo.render("DANMAKU UNIVERSE", True, (255, 220, 0))
-    txt_sub = fonte_subtitulo.render("Pressione ENTER para Continuar", True, (255, 255, 255))
+    txt_sub = fonte_subtitulo.render("Pressione ENTER para campanha", True, (255, 255, 255))
+    txt_endless = fonte_subtitulo.render("Pressione E para modo endless", True, (200, 200, 200))
     tela.blit(txt_titulo, (LARGURA // 2 - txt_titulo.get_width() // 2, ALTURA // 3))
     tela.blit(txt_sub, (LARGURA // 2 - txt_sub.get_width() // 2, ALTURA // 2))
+    tela.blit(txt_endless, (LARGURA // 2 - txt_endless.get_width() // 2, ALTURA // 1.5))
 
 def mostrar_tela_dificuldade():
     tela.fill((15, 20, 35))
@@ -380,12 +405,26 @@ def mostrar_tela_gameover():
     tela.blit(txt_pts, (LARGURA // 2 - txt_pts.get_width() // 2, ALTURA // 2))
     tela.blit(txt_RE, (LARGURA // 2 - txt_RE.get_width() // 2, ALTURA // 1.5))
 
+def mostrar_tela_vitoria():
+    tela.fill((10, 40, 20))
+    txt_vit = fonte_titulo.render("VITÓRIA! VOCÊ SALVOU O UNIVERSO", True, (0, 255, 150))
+    txt_RE = fonte_subtitulo.render("Pressione ENTER para Voltar ao Menu", True, (200, 200, 200))
+    
+    tela.blit(txt_vit, (LARGURA // 2 - txt_vit.get_width() // 2, ALTURA // 4))
+    tela.blit(txt_RE, (LARGURA // 2 - txt_RE.get_width() // 2, ALTURA // 1.5))
+
 def iniciar_gameplay():
-    global PONTUACAO, PROXIMO_BOSS, PROXIMA_BOMBA, APARICOES_BOSS, jogador, boss
+    global PONTUACAO, PROXIMO_BOSS, PROXIMA_BOMBA, APARICOES_BOSS, jogador, boss, VENCEU
     PONTUACAO = 0
-    PROXIMO_BOSS = 5000
     PROXIMA_BOMBA = 5000
     boss = None
+    VENCEU = False
+
+    if MODO_DE_JOGO == "CAMPANHA":
+        PROXIMO_BOSS = 8000
+    else:
+        PROXIMO_BOSS = 5000
+
     todos_os_sprites.empty()
     grupo_tiros.empty()
     grupo_inimigos.empty()
@@ -427,6 +466,11 @@ while rodando:
             if ESTADO == "MENU":
                 if evento.key == pygame.K_RETURN:
                     som_escolha_menu.play()
+                    MODO_DE_JOGO = "CAMPANHA"
+                    ESTADO = "SELECAO_DIFICULDADE"
+                elif evento.key == pygame.K_e:
+                    som_escolha_menu.play()
+                    MODO_DE_JOGO = "ENDLESS"    
                     ESTADO = "SELECAO_DIFICULDADE"
                     
             elif ESTADO == "SELECAO_DIFICULDADE":
@@ -450,7 +494,7 @@ while rodando:
                     som_bomba.play()
                     duracao_flash_bomba = 10
                     
-            elif ESTADO == "GAMEOVER":
+            elif ESTADO in ["GAMEOVER", "VITORIA"]:
                 if evento.key == pygame.K_RETURN:
                     ESTADO = "MENU"
 
@@ -492,14 +536,18 @@ while rodando:
         if ESTADO == "BOSS" and boss and boss.vida <= 0:
             boss.kill()
             boss = None
-            PONTUACAO += 1500 
-            APARICOES_BOSS += 1 
-            PROXIMO_BOSS += 5000 
-            ESTADO = "JOGANDO"
-            pygame.mixer.music.stop()
-            pygame.mixer.music.load('musica/Stage.mp3')
-            pygame.mixer.music.play(-1)
-        
+            PONTUACAO += 1500
+            if MODO_DE_JOGO == "CAMPANHA":
+                ESTADO = "VITORIA"
+                pygame.mixer.music.stop()
+            else:
+                APARICOES_BOSS += 1 
+                PROXIMO_BOSS += 5000 
+                ESTADO = "JOGANDO"
+                pygame.mixer.music.stop()
+                pygame.mixer.music.load('musica/Stage.mp3')
+                pygame.mixer.music.play(-1)
+
         for inimigo in grupo_inimigos:
             if jogador.hitbox.colliderect(inimigo.rect):
                 inimigo.kill()
@@ -518,7 +566,7 @@ while rodando:
             pygame.mixer.music.stop()
 
         # Renderização
-        tela.fill((20, 20, 30)) 
+        atualizar_e_desenhar_fundo()
         todos_os_sprites.draw(tela)
 
         if duracao_flash_bomba > 0:
@@ -537,6 +585,9 @@ while rodando:
 
     elif ESTADO == "GAMEOVER":
         mostrar_tela_gameover()
+
+    elif ESTADO == "VITORIA":
+        mostrar_tela_vitoria()
 
     pygame.display.flip()
     relogio.tick(FPS)
