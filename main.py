@@ -407,7 +407,7 @@ def mostrar_tela_gameover():
 
 def mostrar_tela_vitoria():
     tela.fill((10, 40, 20))
-    txt_vit = fonte_titulo.render("VITÓRIA! VOCÊ SALVOU O UNIVERSO", True, (0, 255, 150))
+    txt_vit = fonte_titulo.render("VOCÊ SALVOU O UNIVERSO", True, (0, 255, 150))
     txt_RE = fonte_subtitulo.render("Pressione ENTER para Voltar ao Menu", True, (200, 200, 200))
     
     tela.blit(txt_vit, (LARGURA // 2 - txt_vit.get_width() // 2, ALTURA // 4))
